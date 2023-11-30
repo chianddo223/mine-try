@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Que pasa</title>
+    <style>
+        @font-face {
+            font-family: 'CookieRun-Regular';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/CookieRun-Regular.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        table {
+            border-collapse: collapse;
+            background: #888;
+        }
+
+        td {
+            font-family: 'CookieRun-Regular';
+            font-size: 5.8vw;
+            border: 1vw solid #bbb;
+            text-align: center;
+            line-height: 20px;
+            width: 8vw;
+            height: 8vw;
+            background: #888;
+        }
+
+        td#mine {
+            color: #888;
+            background: #888;
+        }
+    </style>
+</head>
+
+<body>
+<table id="table">
+    <tbody>
+    </tbody>
+</table>
+<form id="form">
+    <input placeholder="가로 줄" id="row" size="5" />
+    <input placeholder="세로 줄" id="cell" size="5" />
+    <input placeholder="지뢰" id="mine" size="5" />
+    <button>게임시작</button>
+</form>
+<script>
+const $tbody = document.querySelector('#table tbody');
+const $inputRow = document.querySelector('#row');
+const $inputCol = document.querySelector('#cell');
+const $inputMine = document.querySelector('#mine');
+const $btn = document.querySelector('button');
+const rows = [];
+const randomArray = [];
+const mineArray = [];
+let flattedArray = rows.flat();
+let copyFlatted = flattedArray.concat();
+let numRows = 0;
+let numClos = 0;
+let numMine = 0;
+let arrayWidth = 0;
+$btn.addEventListener('click', startGame);
+function startGame() {
+    event.preventDefault();
+    numRows = $inputRow.value;
+    numClos = $inputCol.value;
+    numMine = parseInt($inputMine.value);
+    arrayWidth = numRows * numClos;
+    for (let i = 0; i < numRows; i++) { // 2차원배열 만들기.
+        const $tr = document.createElement('tr');
+        const cells = [];
+        for (let j = 0; j < numClos; j++) { // 각각의 td가 생성되면서 특성부여받음.
+            const $td = document.createElement('td');
+            $td.addEventListener('click', onClick);
+            $td.addEventListener('contextmenu', fillRed);
+            $td.classList.add(i * 10 + j);
+            cells.push($td);
+            $tr.append($td);
+        }
+        rows.push(cells);
+        $tbody.append($tr);
+    };
+    flattedArray = rows.flat();
+    copyFlatted = flattedArray.concat();
+    shuffleMine();
+};
+function shuffleMine() {
+    // console.log(flattedArray)
+    for (let i = 0; i < numMine; i++) { // 랜덤 지뢰 배열만들기.
+        const randomIndex = flattedArray.splice(Math.floor(Math.random() * flattedArray.length), 1);
+        randomArray.push(randomIndex);
+    }
+    const flattedRandom = randomArray.flat();
+    for (let j = 0; j < numMine; j++) { // 지뢰 배열 만들고, id, 텍스트 달아주기.
+        mineArray.push(flattedRandom[j]);
+        mineArray[j].id = "mine";
+    }
+}
+function onClick() { // 공간을 클릭했을 때.
+    if (this.id === 'mine') { // 지뢰일 때 
+        this.style.background = 'black';
+        this.textContent = '💥';
+    } else { // 지뢰가 아닐 때 주변 지뢰갯수 체크.
+        checkAround(this);
+    };
+};
+function fillRed() {
+    event.preventDefault();
+    if (this.textContent === '🚩') {
+        this.style.background = '#888';
+        this.textContent = '';
+    } else {
+         this.style.background = '#888';
+        this.textContent = '🚩';
+   };
+};
+
+function checkAround( clickedBlock ){
+        const onClickClass = clickedBlock.className;
+        const checkList = [];
+        const classOfCheckList = [onClickClass - 11, onClickClass - 10, onClickClass - 9,
+        onClickClass - 1, parseInt(onClickClass) + 1,
+        parseInt(onClickClass) + 9, parseInt(onClickClass) + 10, parseInt(onClickClass) + 11];
+        for (let i = 0; i < classOfCheckList.length; i++) {
+            checkList.push(copyFlatted[classOfCheckList[i]]);
+        };
+        console.log(checkList);
+        const countMine = checkList.filter(item => item.id === "mine").length;
+        clickedBlock.textContent = countMine;
+        clickedBlock.style.background = 'white';
+        if (countMine === 0) {
+            for (let i = 0; i < checkList.length; i++) {
+                checkAround(checkList[i]);
+                // copyFlatted[checkList[i].className]
+            }
+            // clickedBlock.textContent = ''; 
+            // let aroundCheckList = [];
+            // for (let j = 0; j < classOfCheckList.length; j++) {
+            //     const aroundClass = copyFlatted[classOfCheckList[j]].className;
+            //     const aroundClassOfCheckList = [aroundClass - 11, aroundClass - 10, aroundClass - 9,
+            //     aroundClass - 1, parseInt(aroundClass) + 1,
+            //     parseInt(aroundClass) + 9, parseInt(aroundClass) + 10, parseInt(aroundClass) + 11];
+            //     for (let k = 0; k < aroundClassOfCheckList.length; k++) {
+            //         aroundCheckList.push(copyFlatted[aroundClassOfCheckList[k]]);
+            //     };
+            //     const aroundCountMine = aroundCheckList.filter(item => item.id === "mine").length;
+            //     copyFlatted[classOfCheckList[j]].textContent = aroundCountMine;
+            //     if( aroundCountMine === 0 ){ // 주변에 지뢰가 없는 땅 발견 시.
+            //         copyFlatted[classOfCheckList[j]].textContent = '';
+            //     }
+            //     copyFlatted[classOfCheckList[j]].style.background = 'white';
+            //     aroundCheckList = [];
+            // }
+}
+}
+// console.log(rows);
+</script>
+</body>
+
+</html>
