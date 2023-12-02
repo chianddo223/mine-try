@@ -65,8 +65,8 @@ let arrayWidth = 0;
 $btn.addEventListener('click', startGame);
 function startGame() {
     event.preventDefault();
-    numRows = $inputRow.value;
-    numClos = $inputCol.value;
+    numRows = $inputRow.value; // 세로 값 
+    numClos = $inputCol.value; // 가로 값
     numMine = parseInt($inputMine.value);
     arrayWidth = numRows * numClos;
     for (let i = 0; i < numRows; i++) { // 2차원배열 만들기.
@@ -124,40 +124,42 @@ function fillRed() {
    };
 };
 
-function checkAround( clickedBlock ){
-        const onClickClass = clickedBlock.className;
+function checkAround( clickedBlock ){ // 주변에 지뢰갯수 체크하고 표시해줌.
+        const onClickClass = clickedBlock.className;        
         const checkList = [];
         const classOfCheckList = [onClickClass - 11, onClickClass - 10, onClickClass - 9,
         onClickClass - 1, parseInt(onClickClass) + 1,
         parseInt(onClickClass) + 9, parseInt(onClickClass) + 10, parseInt(onClickClass) + 11];
-        for (let i = 0; i < classOfCheckList.length; i++) {
-            checkList.push(copyFlatted[classOfCheckList[i]]);
+        const filteredClass1 = classOfCheckList.filter( item => -1 < item && item< numRows * numClos );
+        for (let i = 0; i < filteredClass1.length; i++) { // 존재하는 칸만 필터링. 
+            checkList.push(copyFlatted[filteredClass1[i]]);
         };
         console.log(checkList);
         const countMine = checkList.filter(item => item.id === "mine").length;
         clickedBlock.textContent = countMine;
         clickedBlock.style.background = 'white';
         if (countMine === 0) {
-            // for (let i = 0; i < checkList.length; i++) {
-            //     secondCheckAround(checkList[i]);
-            //     // copyFlatted[checkList[i].className]
-            // }
             clickedBlock.textContent = ''; 
             let aroundCheckList = [];
-            for (let j = 0; j < classOfCheckList.length; j++) { // 선택한 칸의 주변 칸의, 주변 지뢰 갯수를 확인함. 반복문이 시행될 때 마다 지뢰의 수가 새롭게 갱신되고, 주변 지뢰 수가 0인 칸을 빈 칸으로 만들어 줌.
-                const aroundClass = copyFlatted[classOfCheckList[j]].className;
+            for (let j = 0; j < checkList.length; j++) { // 선택한 칸의 주변 칸의, 주변 지뢰 갯수를 확인함. 반복문이 시행될 때 마다 지뢰의 수가 새롭게 갱신되고, 주변 지뢰 수가 0인 칸을 빈 칸으로 만들어 줌.
+                const aroundClass = checkList[j].className;
                 const aroundClassOfCheckList = [aroundClass - 11, aroundClass - 10, aroundClass - 9,
                 aroundClass - 1, parseInt(aroundClass) + 1,
                 parseInt(aroundClass) + 9, parseInt(aroundClass) + 10, parseInt(aroundClass) + 11];
-                for (let k = 0; k < aroundClassOfCheckList.length; k++) {
-                    aroundCheckList.push(copyFlatted[aroundClassOfCheckList[k]]);
+                console.log(aroundClassOfCheckList)
+                const filteredClass2 = aroundClassOfCheckList.filter( item => -1 < item && item < numRows * numClos);
+                console.log(numRows * numClos)
+                console.log(filteredClass2)
+                for (let k = 0; k < filteredClass2.length; k++) { // 존재하는 칸만 필터링. 
+                    aroundCheckList.push(copyFlatted[filteredClass2[k]]);
                 }; 
+                console.log(aroundCheckList)
                 const aroundCountMine = aroundCheckList.filter(item => item.id === "mine").length;
-                copyFlatted[classOfCheckList[j]].textContent = aroundCountMine;
+                copyFlatted[filteredClass1[j]].textContent = aroundCountMine;
                 if( aroundCountMine === 0 ){ // 주변에 지뢰가 없는 땅 발견 시.
-                    copyFlatted[classOfCheckList[j]].textContent = '';
+                    copyFlatted[filteredClass1[j]].textContent = '';
                 }
-                copyFlatted[classOfCheckList[j]].style.background = 'white';
+                copyFlatted[filteredClass1[j]].style.background = 'white';
                 aroundCheckList = [];
             };
 
