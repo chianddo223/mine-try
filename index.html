@@ -125,12 +125,49 @@ function fillRed() {
 };
 
 function checkAround( clickedBlock ){ // 주변에 지뢰갯수 체크하고 표시해줌.
-        const onClickClass = clickedBlock.className;        
+        const onClickClass = parseInt(clickedBlock.className);        
         const checkList = [];
-        const classOfCheckList = [onClickClass - 11, onClickClass - 10, onClickClass - 9,
-        onClickClass - 1, parseInt(onClickClass) + 1,
-        parseInt(onClickClass) + 9, parseInt(onClickClass) + 10, parseInt(onClickClass) + 11];
-        const filteredClass1 = classOfCheckList.filter( item => -1 < item && item< numRows * numClos );
+        const leftSide = [];
+        const rightSide = [];
+        for (let i = 0; i < numClos; i++) {
+            leftSide.push(numRows * i);
+        }
+        for (let i = 0; i < numClos; i++) {
+            rightSide.push((numRows * (i+1))-1);
+        }
+        let classOfCheckList = [];
+        console.log(clickedBlock===rows[numClos-1][0])
+        switch (clickedBlock) { // 새어 나가는 검사칸 필터링 - 모서리
+            case rows[0][0]:
+                classOfCheckList = [onClickClass + 1, onClickClass + numRows, onClickClass + numRows + 1];
+                break;
+            case rows[0][numRows-1]:
+                classOfCheckList = [onClickClass -1, onClickClass + numRows, onClickClass + numRows - 1];
+                break;
+            case rows[numClos-1][0]:
+                console.log('as');
+                classOfCheckList = [parseInt(onClickClass) + 1 ,onClickClass -numRows, parseInt(onClickClass -numRows) + 1];
+                break;
+            case rows[numClos-1][numRows-1]:
+                classOfCheckList = [onClickClass -1, onClickClass - numRows, onClickClass - numRows -1];
+                break;
+            }
+            console.log(classOfCheckList);
+        if (rows[0].includes(clickedBlock) && classOfCheckList.length === 0 ) { // 새어 나가는 검사칸 필터링 - 가장자리
+            classOfCheckList = [onClickClass + 1, onClickClass -1, onClickClass -1 + numRows, onClickClass + numRows, onClickClass + numRows + 1];
+        } else if(rows[numClos-1].includes(clickedBlock) && classOfCheckList.length === 0  ){
+            classOfCheckList = [onClickClass + 1, onClickClass -1, onClickClass + 1 - numRows, onClickClass -1 - numRows, onClickClass -numRows];
+        } else if (leftSide.includes(onClickClass) && classOfCheckList.length === 0 ) {
+            classOfCheckList = [onClickClass - numRows, onClickClass - numRows + 1, onClickClass + 1, onClickClass + numRows, onClickClass + numRows +1];
+        } else if (rightSide.includes(onClickClass) && classOfCheckList.length === 0 ){
+            classOfCheckList = [onClickClass - numRows, onClickClass - numRows -1, onClickClass -1, onClickClass + numRows, onClickClass + numRows -1];
+        } else if (classOfCheckList.length === 0){
+            classOfCheckList = [onClickClass - 11, onClickClass - 10, onClickClass - 9,
+            onClickClass - 1, parseInt(onClickClass) + 1,
+            parseInt(onClickClass) + 9, parseInt(onClickClass) + 10, parseInt(onClickClass) + 11];    
+        };
+        console.log(classOfCheckList);
+        const filteredClass1 = classOfCheckList.filter( item => -1 < item && item< numRows * numClos ); // 삐져나가는 검사 칸 필터링.
         for (let i = 0; i < filteredClass1.length; i++) { // 존재하는 칸만 필터링. 
             checkList.push(copyFlatted[filteredClass1[i]]);
         };
@@ -138,36 +175,58 @@ function checkAround( clickedBlock ){ // 주변에 지뢰갯수 체크하고 표
         const countMine = checkList.filter(item => item.id === "mine").length;
         clickedBlock.textContent = countMine;
         clickedBlock.style.background = 'white';
-        if (countMine === 0) {
+        if (countMine === 0) { // 2차 절차 (처음 눌린 칸이 흰 칸일 때 그 주변의 주변을 검사.)
             clickedBlock.textContent = ''; 
             let aroundCheckList = [];
+            
             for (let j = 0; j < checkList.length; j++) { // 선택한 칸의 주변 칸의, 주변 지뢰 갯수를 확인함. 반복문이 시행될 때 마다 지뢰의 수가 새롭게 갱신되고, 주변 지뢰 수가 0인 칸을 빈 칸으로 만들어 줌.
                 const aroundClass = checkList[j].className;
-                const aroundClassOfCheckList = [aroundClass - 11, aroundClass - 10, aroundClass - 9,
-                aroundClass - 1, parseInt(aroundClass) + 1,
-                parseInt(aroundClass) + 9, parseInt(aroundClass) + 10, parseInt(aroundClass) + 11];
-                console.log(aroundClassOfCheckList)
-                const filteredClass2 = aroundClassOfCheckList.filter( item => -1 < item && item < numRows * numClos);
-                console.log(numRows * numClos)
-                console.log(filteredClass2)
-                for (let k = 0; k < filteredClass2.length; k++) { // 존재하는 칸만 필터링. 
-                    aroundCheckList.push(copyFlatted[filteredClass2[k]]);
-                }; 
-                console.log(aroundCheckList)
-                const aroundCountMine = aroundCheckList.filter(item => item.id === "mine").length;
-                copyFlatted[filteredClass1[j]].textContent = aroundCountMine;
-                if( aroundCountMine === 0 ){ // 주변에 지뢰가 없는 땅 발견 시.
-                    copyFlatted[filteredClass1[j]].textContent = '';
-                }
-                copyFlatted[filteredClass1[j]].style.background = 'white';
-                aroundCheckList = [];
-            };
-
-}
-}
-
-function secondCheckAround( secondCheckList ){
-    console.log( secondCheckList );
+                let aroundClassOfCheckList = [];
+                switch (clickedBlock) { // 새어 나가는 검사칸 필터링 - 모서리
+            case rows[0][0]:
+                aroundClassOfCheckList = [aroundClass + 1, aroundClass + numRows, aroundClass + numRows + 1];
+                break;
+            case rows[0][numRows-1]:
+                aroundClassOfCheckList = [aroundClass -1, aroundClass + numRows, aroundClass + numRows - 1];
+                break;
+            case rows[numClos-1][0]:
+                aroundClassOfCheckList = [aroundClass + 1 ,aroundClass -numRows, aroundClass -numRows + 1];
+                break;
+            case rows[numClos-1][numRows-1]:
+                aroundClassOfCheckList = [aroundClass -1, aroundClass - numRows, aroundClass - numRows -1];
+                break;
+            }
+            
+        if (rows[0].includes(clickedBlock) && aroundClassOfCheckList.length === 0 ) { // 새어 나가는 검사칸 필터링 - 가장자리
+            aroundClassOfCheckList = [aroundClass + 1, aroundClass -1, aroundClass -1 + numRows, aroundClass + numRows, aroundClass + numRows + 1];
+        } else if(rows[numClos-1].includes(clickedBlock) && aroundClassOfCheckList.length === 0  ){
+            aroundClassOfCheckList = [aroundClass + 1, aroundClass -1, aroundClass + 1 - numRows, aroundClass -1 - numRows, aroundClass -numRows];
+        } else if (leftSide.includes(aroundClass) && aroundClassOfCheckList.length === 0 ) {
+            aroundClassOfCheckList = [aroundClass - numRows, aroundClass - numRows + 1, aroundClass + 1, aroundClass + numRows, aroundClass + numRows +1];
+        } else if (rightSide.includes(aroundClass) && aroundClassOfCheckList.length === 0 ){
+            aroundClassOfCheckList = [aroundClass - numRows, aroundClass - numRows -1, aroundClass -1, aroundClass + numRows, aroundClass + numRows -1];
+        } else if( aroundClassOfCheckList.length === 0){
+            aroundClassOfCheckList = [aroundClass - 11, aroundClass - 10, aroundClass - 9,
+            aroundClass - 1, parseInt(aroundClass) + 1,
+            parseInt(aroundClass) + 9, parseInt(aroundClass) + 10, parseInt(aroundClass) + 11];    
+        };
+        // console.log(aroundClassOfCheckList)
+        const filteredClass2 = aroundClassOfCheckList.filter( item => -1 < item && item < numRows * numClos); // 삐져나가는 검사 칸 필터링. 
+        // console.log(numRows * numClos)
+        // console.log(filteredClass2)
+        for (let k = 0; k < filteredClass2.length; k++) { // 존재하는 칸만 필터링. 
+            aroundCheckList.push(copyFlatted[filteredClass2[k]]);
+        }; 
+        // console.log(aroundCheckList)
+        const aroundCountMine = aroundCheckList.filter(item => item.id === "mine").length;
+        copyFlatted[filteredClass1[j]].textContent = aroundCountMine;
+        if( aroundCountMine === 0 ){ // 주변에 지뢰가 없는 땅 발견 시.
+            copyFlatted[filteredClass1[j]].textContent = '';
+        }
+        copyFlatted[filteredClass1[j]].style.background = 'white';
+        aroundCheckList = [];
+       }
+    }
 }
 console.log(rows);
 </script>
