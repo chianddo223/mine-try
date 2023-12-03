@@ -118,7 +118,8 @@ function onClick() { // 공간을 클릭했을 때.
     const whiteBlock = copyFlatted.filter((item) => item.style.background === 'white');
     for( let i = 0; i < whiteBlock.length; i++){
         checkAround(whiteBlock[i]);
-    }
+    };
+    checkWin();
 }
 };
 function fillRed() {
@@ -223,15 +224,46 @@ function checkAround( clickedBlock ){ // 주변에 지뢰갯수 체크하고 표
             aroundCheckList.push(copyFlatted[filteredClass2[k]]);
         }; 
         const aroundCountMine = aroundCheckList.filter(item => item.id === "mine").length;
-        console.log(aroundCountMine)
         copyFlatted[aroundClass].textContent = aroundCountMine;
         if( aroundCountMine === 0 ){ // 주변에 지뢰가 없는 땅 발견 시.
             copyFlatted[aroundClass].textContent = '';
         }
         copyFlatted[aroundClass].style.background = 'white';
-        console.log(aroundClassOfCheckList, aroundCheckList)
         aroundCheckList = [];
        }
+    }
+}
+function checkWin(){
+    const blank = copyFlatted.filter(item => item.id !== "mine");
+    const noBlank = blank.every(item => item.style.background === 'white');
+    const allMine = copyFlatted.filter(item => item.id === 'mine'); 
+    if(noBlank){
+        allMine.forEach((mine, index) => {
+            setTimeout(() => {
+                mine.textContent = '💥';
+                mine.style.transition = 'opacity 1s ease-in-out';
+                mine.style.opacity = 0;
+            }, 1000 + index * 200); // 각 지뢰마다 0.2초 간격으로 실행
+        });
+
+        setTimeout(() => {
+            allMine.forEach(mine => {
+                mine.style.opacity = 1;
+            });
+        }, allMine.length * 200 + 3000); // 모든 지뢰가 표시된 후 3초 대기
+
+        setTimeout(() => {
+            allMine.forEach(mine => {
+                mine.style.opacity = 0;
+            })
+        }, allMine.length * 200 + 5000);
+
+        setTimeout(() => {
+            allMine.forEach(mine => {
+                mine.textContent = '🎉';
+                mine.style.opacity = 1;
+            })
+        }, allMine.length * 200 + 6000);
     }
 }
 </script>
