@@ -64,7 +64,6 @@ let numRowsInt = 0;
 let numClosInt = 0;
 let numMine = 0;
 let arrayWidth = 0;
-let canClick = true;
 $btn.addEventListener('click', startGame);
 function startGame() {
     event.preventDefault();
@@ -111,6 +110,7 @@ function onClick() { // 공간을 클릭했을 때.
     if (this.id === 'mine') { // 지뢰일 때 
         this.style.background = 'black';
         this.textContent = '💥';
+        defeat();
     } else { // 지뢰가 아닐 때 주변 지뢰갯수 체크.
         checkAround(this);
     };
@@ -233,10 +233,11 @@ function checkAround( clickedBlock ){ // 주변에 지뢰갯수 체크하고 표
        }
     }
 }
+
 function checkWin(){
+    const allMine = copyFlatted.filter(item => item.id === 'mine'); 
     const blank = copyFlatted.filter(item => item.id !== "mine");
     const noBlank = blank.every(item => item.style.background === 'white');
-    const allMine = copyFlatted.filter(item => item.id === 'mine'); 
     if(noBlank){
         allMine.forEach((mine, index) => {
             setTimeout(() => {
@@ -264,8 +265,41 @@ function checkWin(){
                 mine.style.opacity = 1;
             })
         }, allMine.length * 200 + 6000);
-    }
+        setTimeout(() => {
+            const confirm = window.confirm('승리 !! \n게임을 다시 하시겠습니까?');
+            if(confirm){
+              reGame();
+              };
+        }, allMine.length * 200 + 7000);
+    };
 }
+const randomMine = [];
+function defeat(){
+    const allMine = copyFlatted.filter(item => item.id === 'mine'); 
+    for( let i = 0; i< numMine; i++){
+        const randomIndex = allMine.splice(Math.floor(allMine.length * Math.random()), 1);
+        randomMine.push(randomIndex[0]);
+    };
+    console.log(randomMine)
+    randomMine.forEach((mine, index) => {
+            setTimeout(() => {
+                mine.textContent = '💥';
+                mine.style.background = 'black';
+                mine.style.transition = 'opacity 1s ease-in-out';
+                mine.style.opacity = 1;
+            }, 1000 + index * 200); // 각 지뢰마다 0.2초 간격으로 실행
+        });
+        setTimeout(()=>{
+            const confirm = window.confirm('패배 ㅠㅠ \n게임을 다시 하시겠습니까?');
+            if(confirm){
+            reGame();
+        };
+        }, 1000 + randomMine.length * 200);
+       
+}
+function reGame(){
+    location.reload();
+};
 </script>
 </body>
 
