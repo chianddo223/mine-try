@@ -20,18 +20,41 @@
 
         td {
             font-family: 'CookieRun-Regular';
-            font-size: 5.8vw;
-            border: 1vw solid #bbb;
+            font-size: 2vw;
+            border: 0.4vw solid #bbb;
             text-align: center;
-            line-height: 20px;
-            width: 8vw;
-            height: 8vw;
+            width: 3vw;
+            height: 3vw;
             background: #888;
+            overflow: hidden;
         }
 
         td#mine {
             color: #888;
             background: #888;
+        }
+
+        @media screen and (max-width : 768px) {
+        table {
+            border-collapse: collapse;
+            background: #888;
+        }
+
+        td {
+            font-family: 'CookieRun-Regular';
+            font-size: 5vw;
+            border: 1.3vw solid #bbb;
+            text-align: center;
+            width: 7vw;
+            height: 7vw;
+            background: #888;
+            overflow: hidden;
+        }
+
+        td#mine {
+            color: #888;
+            background: #888;
+        }
         }
     </style>
 </head>
@@ -60,17 +83,13 @@ let flattedArray = rows.flat();
 let copyFlatted = flattedArray.concat();
 let numRows = 0;
 let numClos = 0;
-let numRowsInt = 0;
-let numClosInt = 0;
 let numMine = 0;
 let arrayWidth = 0;
 $btn.addEventListener('click', startGame);
 function startGame() {
     event.preventDefault();
-    numRows = $inputRow.value; // 세로 값 
-    numClos = $inputCol.value; // 가로 값
-    numRowsInt = parseInt(numRows, 10);
-    numClosInt = parseInt(numClos, 10);
+    numRows = parseInt($inputRow.value); // 세로 값 
+    numClos = parseInt($inputCol.value); // 가로 값
     numMine = parseInt($inputMine.value);
     arrayWidth = numRows * numClos;
     for (let i = 0; i < numRows; i++) { // 2차원배열 만들기.
@@ -80,7 +99,7 @@ function startGame() {
             const $td = document.createElement('td');
             $td.addEventListener('click', onClick);
             $td.addEventListener('contextmenu', fillRed);
-            $td.classList.add(i * 10 + j);
+            $td.classList.add(i * numRows + j);
             cells.push($td);
             $tr.append($td);
         }
@@ -141,45 +160,45 @@ function checkAround( clickedBlock ){ // 주변에 지뢰갯수 체크하고 표
         const checkList = [];
         const leftSide = [];
         const rightSide = [];
-        for (let i = 0; i < numClosInt; i++) {
-            leftSide.push(numRowsInt * i);
+        for (let i = 0; i < numClos; i++) {
+            leftSide.push(numRows * i);
         }
-        for (let i = 0; i < numClosInt; i++) {
-            rightSide.push((numRowsInt * (i+1))-1);
+        for (let i = 0; i < numClos; i++) {
+            rightSide.push((numRows * (i+1))-1);
         }
         let classOfCheckList = [];
         switch (clickedBlock) { // 새어 나가는 검사칸 필터링 - 모서리
             case rows[0][0]:
-                classOfCheckList = [onClickClass + 1, onClickClass + numRowsInt, onClickClass + numRowsInt + 1];
+                classOfCheckList = [onClickClass + 1, onClickClass + numRows, onClickClass + numRows + 1];
                 break;
-            case rows[0][numRowsInt-1]:
-                classOfCheckList = [onClickClass -1, onClickClass + numRowsInt, onClickClass + numRowsInt - 1];
+            case rows[0][numRows-1]:
+                classOfCheckList = [onClickClass -1, onClickClass + numRows, onClickClass + numRows - 1];
                 break;
-            case rows[numClosInt-1][0]:
-                classOfCheckList = [parseInt(onClickClass) + 1 ,onClickClass -numRowsInt, parseInt(onClickClass -numRowsInt) + 1];
+            case rows[numClos-1][0]:
+                classOfCheckList = [parseInt(onClickClass) + 1 ,onClickClass -numRows, parseInt(onClickClass -numRows) + 1];
                 break;
-            case rows[numClosInt-1][numRowsInt-1]:
-                classOfCheckList = [onClickClass -1, onClickClass - numRowsInt, onClickClass - numRowsInt -1];
+            case rows[numClos-1][numRows-1]:
+                classOfCheckList = [onClickClass -1, onClickClass - numRows, onClickClass - numRows -1];
                 break;
             }
         if (rows[0].includes(clickedBlock) && classOfCheckList.length === 0 ) { // 새어 나가는 검사칸 필터링 - 가장자리
-            classOfCheckList = [onClickClass + 1, onClickClass -1, onClickClass -1 + numRowsInt, onClickClass + numRowsInt, onClickClass + numRowsInt + 1];
-        } else if(rows[numClosInt-1].includes(clickedBlock) && classOfCheckList.length === 0  ){
-            classOfCheckList = [onClickClass + 1, onClickClass -1, onClickClass + 1 - numRowsInt, onClickClass -1 - numRowsInt, onClickClass -numRowsInt];
+            classOfCheckList = [onClickClass + 1, onClickClass -1, onClickClass -1 + numRows, onClickClass + numRows, onClickClass + numRows + 1];
+        } else if(rows[numClos-1].includes(clickedBlock) && classOfCheckList.length === 0  ){
+            classOfCheckList = [onClickClass + 1, onClickClass -1, onClickClass + 1 - numRows, onClickClass -1 - numRows, onClickClass -numRows];
         } else if (leftSide.includes(onClickClass) && classOfCheckList.length === 0 ) {
-            classOfCheckList = [onClickClass - numRowsInt, onClickClass - numRowsInt + 1, onClickClass + 1, onClickClass + numRowsInt, onClickClass + numRowsInt +1];
+            classOfCheckList = [onClickClass - numRows, onClickClass - numRows + 1, onClickClass + 1, onClickClass + numRows, onClickClass + numRows +1];
         } else if (rightSide.includes(onClickClass) && classOfCheckList.length === 0 ){
-            classOfCheckList = [onClickClass - numRowsInt, onClickClass - numRowsInt -1, onClickClass -1, onClickClass + numRowsInt, onClickClass + numRowsInt -1];
+            classOfCheckList = [onClickClass - numRows, onClickClass - numRows -1, onClickClass -1, onClickClass + numRows, onClickClass + numRows -1];
         } else if (classOfCheckList.length === 0){
-            classOfCheckList = [onClickClass - 11, onClickClass - 10, onClickClass - 9,
+            classOfCheckList = [onClickClass - numRows -1, onClickClass - numRows, onClickClass - numRows + 1,
             onClickClass - 1, parseInt(onClickClass) + 1,
-            parseInt(onClickClass) + 9, parseInt(onClickClass) + 10, parseInt(onClickClass) + 11];    
+            parseInt(onClickClass) + numRows -1 , parseInt(onClickClass) + numRows, parseInt(onClickClass) + numRows + 1];    
         };
-        const filteredClass1 = classOfCheckList.filter( item => -1 < item && item< numRowsInt * numClosInt ); // 삐져나가는 검사 칸 필터링.
+        const filteredClass1 = classOfCheckList.filter( item => -1 < item && item< numRows * numClos ); // 삐져나가는 검사 칸 필터링.
         for (let i = 0; i < filteredClass1.length; i++) { // 존재하는 칸만 필터링. 
             checkList.push(copyFlatted[filteredClass1[i]]);
         };
-        // console.log(filteredClass1, checkList);
+        console.log(filteredClass1, checkList);
         const countMine = checkList.filter(item => item.id === "mine").length;
         // console.log(countMine);
         clickedBlock.textContent = countMine;
@@ -193,33 +212,33 @@ function checkAround( clickedBlock ){ // 주변에 지뢰갯수 체크하고 표
                 let aroundClassOfCheckList = [];
                 switch (checkList[j]) { // 새어 나가는 검사칸 필터링 - 모서리
             case rows[0][0]:
-                aroundClassOfCheckList = [aroundClass + 1, aroundClass + numRowsInt, aroundClass + numRowsInt + 1];
+                aroundClassOfCheckList = [aroundClass + 1, aroundClass + numRows, aroundClass + numRows + 1];
                 break;
-            case rows[0][numRowsInt-1]:
-                aroundClassOfCheckList = [aroundClass -1, aroundClass + numRowsInt, aroundClass + numRowsInt - 1];
+            case rows[0][numRows-1]:
+                aroundClassOfCheckList = [aroundClass -1, aroundClass + numRows, aroundClass + numRows - 1];
                 break;
-            case rows[numClosInt-1][0]:
-                aroundClassOfCheckList = [aroundClass + 1 ,aroundClass -numRowsInt, aroundClass -numRowsInt + 1];
+            case rows[numClos-1][0]:
+                aroundClassOfCheckList = [aroundClass + 1 ,aroundClass -numRows, aroundClass -numRows + 1];
                 break;
-            case rows[numClosInt-1][numRowsInt-1]:
-                aroundClassOfCheckList = [aroundClass -1, aroundClass - numRowsInt, aroundClass - numRowsInt -1];
+            case rows[numClos-1][numRows-1]:
+                aroundClassOfCheckList = [aroundClass -1, aroundClass - numRows, aroundClass - numRows -1];
                 break;
             }
             
         if (rows[0].includes(checkList[j]) && aroundClassOfCheckList.length === 0 ) { // 새어 나가는 검사칸 필터링 - 가장자리
-            aroundClassOfCheckList = [aroundClass + 1, aroundClass -1, aroundClass -1 + numRowsInt, aroundClass + numRowsInt, aroundClass + numRowsInt + 1];
-        } else if(rows[numClosInt-1].includes(checkList[j]) && aroundClassOfCheckList.length === 0  ){
-            aroundClassOfCheckList = [aroundClass + 1, aroundClass -1, aroundClass + 1 - numRowsInt, aroundClass -1 - numRowsInt, aroundClass -numRowsInt];
+            aroundClassOfCheckList = [aroundClass + 1, aroundClass -1, aroundClass -1 + numRows, aroundClass + numRows, aroundClass + numRows + 1];
+        } else if(rows[numClos-1].includes(checkList[j]) && aroundClassOfCheckList.length === 0  ){
+            aroundClassOfCheckList = [aroundClass + 1, aroundClass -1, aroundClass + 1 - numRows, aroundClass -1 - numRows, aroundClass -numRows];
         } else if (leftSide.includes(aroundClass) && aroundClassOfCheckList.length === 0 ) {
-            aroundClassOfCheckList = [aroundClass - numRowsInt, aroundClass - numRowsInt + 1, aroundClass + 1, aroundClass + numRowsInt, aroundClass + numRowsInt +1];
+            aroundClassOfCheckList = [aroundClass - numRows, aroundClass - numRows + 1, aroundClass + 1, aroundClass + numRows, aroundClass + numRows +1];
         } else if (rightSide.includes(aroundClass) && aroundClassOfCheckList.length === 0 ){
-            aroundClassOfCheckList = [aroundClass - numRowsInt, aroundClass - numRowsInt -1, aroundClass -1, aroundClass + numRowsInt, aroundClass + numRowsInt -1];
+            aroundClassOfCheckList = [aroundClass - numRows, aroundClass - numRows -1, aroundClass -1, aroundClass + numRows, aroundClass + numRows -1];
         } else if( aroundClassOfCheckList.length === 0){
-            aroundClassOfCheckList = [aroundClass - 11, aroundClass - 10, aroundClass - 9,
+            aroundClassOfCheckList = [aroundClass - numRows -1, aroundClass - numRows, aroundClass - numRows + 1,
             aroundClass - 1, parseInt(aroundClass) + 1,
-            parseInt(aroundClass) + 9, parseInt(aroundClass) + 10, parseInt(aroundClass) + 11];    
+            parseInt(aroundClass) + numRows -1, parseInt(aroundClass) + numRows, parseInt(aroundClass) + numRows + 1];    
         };
-        const filteredClass2 = aroundClassOfCheckList.filter( item => -1 < item && item < numRowsInt * numClosInt); // 삐져나가는 검사 칸 필터링. 
+        const filteredClass2 = aroundClassOfCheckList.filter( item => -1 < item && item < numRows * numClos); // 삐져나가는 검사 칸 필터링. 
         for (let k = 0; k < filteredClass2.length; k++) { // 존재하는 칸만 필터링. 
             aroundCheckList.push(copyFlatted[filteredClass2[k]]);
         }; 
@@ -300,6 +319,7 @@ function defeat(){
 function reGame(){
     location.reload();
 };
+console.log(rows)
 </script>
 </body>
 
